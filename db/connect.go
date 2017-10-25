@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/op/go-logging"
-	"wallpager"
 )
 
 var (
@@ -16,9 +15,9 @@ var (
 // 可以设置环境变量 MYSQL_DATA_SOURCE_NAME 来更改 dataSourceName
 // http://godoc.org/github.com/go-sql-driver/mysql
 // 务必调用 defer db.SafeClose() 安全关闭连接
-func Connect() {
+func Connect(connect string) {
 	var err error
-	MySQL, err = sql.Open("mysql", wallpager.DB_CONNECT)
+	MySQL, err = sql.Open("mysql", connect)
 	if err != nil {
 		log.Errorf("Failed to open mysql connect : %s", err.Error())
 	}

@@ -9,7 +9,7 @@ func TestDbConnect(t *testing.T) {
 	Connect(TEST_DB_CONNECT)
 	defer SafeClose()
 
-	_, err := MySQL.Exec(`INSERT INTO person (name, phone) VALUES ("golang", 123456), ("golang1", 123456)`)
+	_, err := MySQL.Exec(`INSERT INTO person (name, phone) VALUES ("golang", 123456), ("golang2", 123456)`)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -30,10 +30,10 @@ func TestDbConnect(t *testing.T) {
 		fmt.Println(err.Error())
 	}
 
-	_, err = MySQL.Exec("DELETE  FROM person")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	//_, err = MySQL.Exec("DELETE  FROM person")
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//}
 }
 
 func TestDbWConnect(t *testing.T) {

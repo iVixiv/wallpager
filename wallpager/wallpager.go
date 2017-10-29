@@ -6,7 +6,6 @@ import (
 )
 
 func Select(start string, mType string) ([]*WallPager, error) {
-	fmt.Println("start ：", start)
 	res := make([]*WallPager, 0)
 	sql := `SELECT wp,tag FROM wallpager ORDER BY %s LIMIT %s,30 `
 	if mType == "rank" {
@@ -22,14 +21,13 @@ func Select(start string, mType string) ([]*WallPager, error) {
 		var tag string
 		var wp string
 		var wdesc string
-		err = rows.Scan(&tag, &wp)
+		err = rows.Scan(&wp, &tag)
 		res = append(res, &WallPager{
 			Tag:  tag,
 			Pic:  wp,
 			Desc: wdesc,
 		})
 	}
-	fmt.Println("end ：", len(res))
 	return res, nil
 }
 

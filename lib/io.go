@@ -5,6 +5,8 @@ import (
 	"github.com/Tang-RoseChild/mahonia"
 	"io/ioutil"
 	"fmt"
+	"net/url"
+	"strings"
 )
 
 func DecodeReader(rd io.Reader, charType string) ([]byte, error) {
@@ -21,10 +23,17 @@ func DecodeReader(rd io.Reader, charType string) ([]byte, error) {
 
 func Slice2String(data []string) string {
 	var result string
-	for index, d := range data {
-		if index != len(data)-1 {
+	for _, d := range data {
+		d = strings.Replace(d, "\"", "", -1)
+		if result != "" {
 			result = result + "," + d
+		} else {
+			result = d
 		}
 	}
 	return result
+}
+
+func parseString(str string) string {
+	return url.PathEscape(str)
 }

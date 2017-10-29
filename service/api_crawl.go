@@ -12,7 +12,7 @@ func handleCrawl(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "text/html; charset=utf-8")
 	defer r.Body.Close()
 
-	Response(w, HandlerSuccessResult(nil, crawler.Crawl_Type(10000)))
+	Response(w, HandlerSuccessResult(nil, crawler.Crawl_Type()))
 }
 
 func HandlerSuccessResult(data interface{}, err error) (string) {

@@ -8,8 +8,9 @@ import (
 	"encoding/json"
 	"wallpager/db"
 	"fmt"
-	"github.com/op/go-logging"
 	"strconv"
+	"wallpager/download"
+	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("crawler")
@@ -50,35 +51,49 @@ func Request(skip int) (error) {
 }
 
 func save(datas []Wallpager) {
-	ch := make(chan int, 100)
-	var insertStr string
-	for index, data := range datas {
-		var time int
-		time = int(data.Atime * 1000)
-
-		insertStr += "(" + "\"" + data.Id + "\"" + "," + strconv.Itoa(data.Rank) + "," + strconv.Itoa(data.Favs) + "," + "\"" + lib.Slice2String(data.Cid) + "\"" + "," + "\"" + lib.Slice2String(data.Tag) + "\"" + "," + "\"" + data.Wp + "\"" + "," + "\"" + data.Thumb + "\"" + "," + "\"" + data.Img + "\"" + "," + "\"" + data.Preview + "\"" + "," + "\"" + data.Desc + "\"" + "," + strconv.Itoa(time) + ")"
-		if index != len(datas)-1 {
-			insertStr += ","
-		}
+	ch := make(chan int, 10)
+	//var insertStr string
+	for _, data := range datas {
+		//var time int
+		//time = int(data.Atime * 1000)
+		//
+		//insertStr += "(" + "\"" + data.Id + "\"" + "," + strconv.Itoa(data.Rank) + "," + strconv.Itoa(data.Favs) + "," + "\"" + lib.Slice2String(data.Cid) + "\"" + "," + "\"" + lib.Slice2String(data.Tag) + "\"" + "," + "\"" + data.Wp + "\"" + "," + "\"" + data.Thumb + "\"" + "," + "\"" + data.Img + "\"" + "," + "\"" + data.Preview + "\"" + "," + "\"" + data.Desc + "\"" + "," + strconv.Itoa(time) + ")"
+		//if index != len(datas)-1 {
+		//	insertStr += ","
+		//}
+		saveDb(data, ch)
+		download.DownloadImg(data.Id, data.Wp)
 	}
-	saveDb(insertStr, ch)
+	//time.Sleep(time.Second)
+	//saveDb(insertStr, ch)
 }
 
-func saveDb(inStr string, ch chan int) {
+func saveDb(w Wallpager, ch chan int) {
 	ch <- 1
 	go func() {
-		res, err := db.MySQL.Exec(`INSERT INTO wallpager (wid,rank,favs,cid,tag,wp,thumb,img,preview,wdesc,atime) VALUES` + inStr)
+		defer func() {
+			<-ch
+		}()
+		stmt, err := db.MySQL.Prepare("INSERT wallpager SET wid=?,rank=?,favs=?,cid=?,tag=?,wp=?,thumb=?,img=?,preview=?,wdesc=?,atime=?")
 		if err != nil {
-			log.Warningf("%s", err.Error())
+			fmt.Printf(" error :%s \n", err.Error())
 			return
 		}
+		defer func() {
+			stmt.Close()
+		}()
+		res, err := stmt.Exec(w.Id, w.Rank, w.Favs, lib.Slice2String(w.Cid), lib.Slice2String(w.Tag), w.Wp, w.Thumb, w.Img, w.Preview, w.Desc, w.Atime)
+		if err != nil {
+			fmt.Printf(" error :%s \n", err.Error())
+			return
+		}
+
 		id, err := res.LastInsertId()
 		if err != nil {
 			fmt.Printf(" %d ,error :%s", id, err.Error())
 		} else {
 			fmt.Printf("insert %d \n", id)
 		}
-		<-ch
 	}()
 }
 
